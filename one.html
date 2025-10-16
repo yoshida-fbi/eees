@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eees 商品一覧</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
+    
+    <style>
+/* リセットと基本設定 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body, h1, h2, h3, p, ul, li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: rgb(255, 255, 255);
+        }
+
+        /* サイト幅共通 */
+        .container {
+            /* 修正1: 最大幅を設定 */
+            max-width: 1500px; 
+            width: 100%;
+            margin: 0 auto;
+            /* パディングはレスポンシブで調整 */
+            padding: 0 20px;
+        }
+
+        /* ヘッダー */
+        .header {
+            background:rgba(255, 255, 255, 0.925);
+            color: #000000;
+            padding: 20px 0;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            box-sizing: border-box;
+            z-index: 1000;
+            /* border-bottom: 0.2px solid #74737349; 色や太さは好みに変更OK */
+
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* 修正2: 幅を100%に変更し、max-widthを追加して中央寄せを維持 */
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            padding: 0 20px; /* .containerのパディングと同じ値を設定 */
+            /* font-weight: bold; */
+        }
+        .header-left .expire {
+            font-size: 14px;
+            white-space: nowrap;
+            
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid #acabab;
+        }
+        .search-box input {
+            border: none;
+            padding: 8px 12px;
+            outline: none;
+            font-size: 14px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0) ;
+        }
+        .search-box button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 16px;
+            color: #444;
+        }
+        .cart-link, .logout-link {
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .cart-link:hover, .logout-link:hover {
+            opacity: 0.8;
+        }
+
+        /* ハンバーガーメニュー */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 200;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: #000000;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* モバイルメニュー */
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background-color: #fff;
+            color: #333;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(189, 23, 23, 0.15);
+            padding: 20px;
+        }
+        .mobile-menu.show {
+            display: flex;
+        }
+        .mobile-menu a  {
+            color: #333;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .mobile-menu .expire {
+            color: #333;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .mobile-menu .search-box {
+            margin-bottom: 15px;
+        }
+
+        /* メインコンテンツ */
+        .main-content {
+            padding: 0 20px;
+            margin-top: 110px; /* ヘッダー高さ分 */
+        }
+
+/* コース選択部分 */
+.course-select {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 1500px; /* containerと同じ幅 */
+}
+
+.course-select .btn {
+    flex: 1; /* 均等に広げる */
+    padding: 12px 0;
+    border-radius: 10px;
+    border: 1px solid #acabab;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    color: #acabab;
+}
+
+.btn.active {
+    background: #924646;
+    color: #fff;
+    border: none;
+}
+
+/* Message */
+.message {
+    text-align: center;
+    margin-top:50px;
+    margin-bottom: 30px;
+}
+
+/* 商品セクション */
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start; 
+            margin-bottom: 40px;
+        }
+        .product-card {
+            flex: 0 0 calc(25% - 10px);
+            text-align: center;
+            margin-bottom:30px;
+        }
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+        }
+        .product-name {
+            font-size: 16px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+/* Filter */
+.filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 0;
+    border-bottom: 0.5px solid rgb(173 171 171);
+}
+
+.sort select {
+    margin-left: 10px;
+}
+
+.select-box {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    height: 30px;
+}
+
+.add-to-cart-btn {
+    display: inline-block;
+    background-color: #3e3e3e; /* カートに入れるボタンの緑色 */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-bottom: 40px;;
+}
+
+.pagination span {
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+/* フッター */
+.footer {
+    color: #000000;
+    /* background-color: #dbd8cc; */
+    text-align: center;
+    padding: 8% 10px;
+    width: 100%;
+    border-top:0.5px solid rgb(0, 0, 0);
+}
+.footer-nav {
+    font-size: 14px;
+    display: flex; 
+    justify-content: center;
+    flex-wrap: wrap; 
+    margin-bottom: 2%;
+    color: #000000;
+}
+.footer-nav a {
+    /* 💡 修正: 縦棒のスペースのためにパディングを確保 */
+    padding: 0 30px; 
+    position: relative;
+    margin: 0; /* 左右のmarginは不要になる */
+}
+
+.footer-nav a:not(:last-child)::after {
+    content: "|"; /* 縦棒 */
+    position: absolute;
+    /* 💡 修正1: 基準点をリンクの右端（パディングの右端）に設定 */
+    right: 0; 
+    top: 50%;
+    /* 💡 修正2: 縦棒自体の幅の半分を右に移動させ、さらに高さを中央寄せ */
+    transform: translate(50%, -50%); 
+    color: #000000;
+}
+
+.footer-logo {
+    font-weight: bold;
+    font-size: 24px;
+}
+.footerlogo {
+    margin-bottom: 2%;
+}
+small {
+    font-size: 14px;
+}
+
+        /* レスポンシブ */
+        @media (max-width: 1000px) {
+             .nav { display: none; }
+             .hamburger { display: flex; }
+        }
+        @media (max-width: 1024px) {
+            .product-card { flex: 0 0 calc(33.33% - 10px); }
+        }
+        @media (max-width: 768px) {
+            /* 修正3: 画面幅768px以下で左右の余白を減らす */
+            .container, .header-inner {
+                padding: 0 10px; 
+            }
+        }
+        @media (max-width: 600px) {
+            .product-card { flex: 0 0 calc(50% - 10px); }
+        }
+        @media (max-width: 480px) {
+            /* 画面幅480px以下でさらに余白を減らす */
+            .container, .header-inner {
+                padding: 0 5px; 
+            }
+        }
+       @media (max-width: 768px) {
+    .footer-nav {
+        flex-direction: column; 
+        gap: 0; 
+        align-items: center; 
+    }
+    
+    .footer-nav a {
+        /* 💡 縦並びの時の設定 */
+        padding: 8px 0; /* 上下のパディングで間隔を確保 */
+        width: 100%; 
+        max-width: 300px; /* リンクの最大幅を制限して中央に寄せる */
+        text-align: center;
+        /* 💡 ご要望の「横棒」として下線を追加 */
+        border-bottom: 1.5px solid rgba(0, 0, 0, 0.3);
+    }
+
+    /* 💡 縦並び時は縦棒を非表示にする最重要設定 */
+    .footer-nav a:not(:last-child)::after {
+        content: none;
+    }
+    
+    /* 最後のリンクの下線は非表示にする（見た目を整える） */
+    .footer-nav a:last-child {
+        border-bottom: none;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <header class="header">
+    <div class="header-inner container">
+        <nav class="nav">
+        <div class="header-left">
+            <p class="expire">有効期限  20XX/12/31</p>
+        </div>
+        </nav>
+        <a href="top.html" class="logo">eees</a>
+
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <nav class="nav">
+            <div class="search-box">
+                <input type="text" placeholder="キーワードを入力">
+                <button type="submit">🔍</button>
+            </div>
+            <a href="#" class="cart-link">🛒</a>
+            <a href="#" class="logout-link">ログアウト</a>
+        </nav>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="search-box">
+            <input type="text" placeholder="キーワードを入力">
+            <button type="submit">🔍</button>
+        </div>
+        <div class="header-left">
+            <p class="expire">有効期限  20XX/12/31</p>
+        </div>
+        <a href="#" class="cart-link">カート🛒</a>
+        <a href="#" class="logout-link">ログアウト</a>
+    </div>
+</header>
+    
+<main class="main-content container">
+    <!-- Course Selection -->
+    <div class="course-select">
+        <a href="three.html" class="btn normal">3品選択コース</a>
+        <a href="one.html" class="btn active">1品選択コース</a>
+    </div>
+
+    <!-- Message -->
+    <div class="message">
+        <p>記念品を1品選択してください</p>
+    </div>
+
+    <div class="product-select">
+    
+    <!-- Filter -->
+    <div class="filter">
+        <select class="select-box">
+            <option>全てのカテゴリー</option>
+        </select>
+        <div class="sort">
+            <select class="select-box">
+                <option>20件</option>
+            </select>
+            <select class="select-box">
+                <option>おすすめ順</option>
+            </select>
+        </div>
+    </div>
+
+    <section class="product-section">
+        <div class="product-list">
+            <div class="product-card"><div><img class="product-image" src="../img/isu.jpg"></div><p class="product-name">木製椅子</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/131.jpg"></div><p class="product-name">モンブラン</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/017.jpg"></div><p class="product-name">クッキー</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/ccc.jpg"></div><p class="product-name">お皿</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/000.jpg"></div><p class="product-name">お箸</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/97b.jpg"></div><p class="product-name">名刺入れ</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/556.jpg"></div><p class="product-name">財布</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/10e.jpg"></div><p class="product-name">カステラ</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/2304.jpg"></div><p class="product-name">いくら</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/61w.jpg"></div><p class="product-name">マスカット</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/isu.jpg"></div><p class="product-name">木製椅子</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/131.jpg"></div><p class="product-name">モンブラン</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/017.jpg"></div><p class="product-name">クッキー</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/ccc.jpg"></div><p class="product-name">お皿</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/000.jpg"></div><p class="product-name">お箸</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/97b.jpg"></div><p class="product-name">名刺入れ</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/556.jpg"></div><p class="product-name">財布</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/10e.jpg"></div><p class="product-name">カステラ</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/2304.jpg"></div><p class="product-name">いくら</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+            <div class="product-card"><div><img class="product-image" src="../img/61w.jpg"></div><p class="product-name">マスカット</p><a href="#" class="add-to-cart-btn">カートに入れる</a></div>
+        </div>
+    </section>
+
+   
+    <!-- Pagination -->
+    <div class="pagination">
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+        <span>次へ</span>
+        <span>最後へ</span>
+    </div>
+</main>
+
+<footer class="footer">
+    <nav class="footer-nav">
+        <a href="#">会社概要</a> 
+        <a href="#">プライバシーポリシー</a> 
+        <a href="#">特定商取引法に基づく表記</a> 
+        <a href="#">お問い合わせ</a>
+    </nav>
+    <div class="footerlogo">
+        <a href="top.html" class="footer-logo">eees</a>
+    </div>
+    <div class="copyright">
+        <small>copyright (c) eees all rights reserved.</small>
+    </div>
+</footer>
+<script>
+    // ハンバーガーメニュー
+    document.getElementById("hamburger").addEventListener("click", function() {
+        document.getElementById("mobileMenu").classList.toggle("show");
+    });
+</script>
+
+</body>
+</html>
